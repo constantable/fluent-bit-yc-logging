@@ -1,0 +1,7 @@
+.DS_Store
+fluent-bit-yc-logging.h
+fluent-bit-yc-logging.so
+cloudapi
+private.key
+pub.key
+.idea
