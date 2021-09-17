@@ -1,5 +1,6 @@
 .DS_Store
-fluent-bit-yc-logging.h
+*.h
+*.so
 cloudapi
 private.key
 pub.key
