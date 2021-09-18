@@ -2,7 +2,7 @@
 *.h
 *.so
 cloudapi
-private.key
-pub.key
+*.key
 .idea
 values-prod-*
+fluent-bit-local.conf

@@ -17,6 +17,7 @@ import (
 	"fluent-bit-yc-logging/connection"
 	"fmt"
 )
+import "google.golang.org/protobuf/types/known/structpb"
 
 //export FLBPluginRegister
 func FLBPluginRegister(def unsafe.Pointer) int {
@@ -28,13 +29,13 @@ func FLBPluginRegister(def unsafe.Pointer) int {
 func FLBPluginInit(plugin unsafe.Pointer) int {
 	cfg, err := config.NewConfig(plugin)
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
+		log.Printf("[ERROR fluent-bit-yc-logging] %v", err)
 		return output.FLB_ERROR
 	}
-
 	client, err := connection.New(cfg)
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
+		log.Printf("[ERROR fluent-bit-yc-logging] %v", err)
+		return output.FLB_ERROR
 	}
 
 	output.FLBPluginSetContext(plugin, client)
@@ -43,7 +44,6 @@ func FLBPluginInit(plugin unsafe.Pointer) int {
 
 //export FLBPluginFlushCtx
 func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int {
-
 	dec := output.NewDecoder(data, int(length))
 	var entries []*logging.IncomingLogEntry
 	for {
@@ -62,16 +62,22 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 			timestampTime = time.Now()
 		}
 		msg := make(map[string]string)
+		json := make(map[string]interface{})
 		for key, value := range record {
 			strKey := fmt.Sprintf("%v", key)
 			strValue := fmt.Sprintf("%v", value)
 
 			msg[strKey] = strValue
+			json[strKey] = value
 		}
-		//out.Write(record, timestamp, C.GoString(tag))
+		payload, err := structpb.NewStruct(json)
+		if err != nil {
+			log.Fatal(err)
+		}
 		entries = append(entries, &logging.IncomingLogEntry{
-			Timestamp: timestamppb.New(timestampTime),
-			Message:   fmt.Sprintf("%#v", msg),
+			Timestamp:   timestamppb.New(timestampTime),
+			Message:     fmt.Sprintf("%v", msg),
+			JsonPayload: payload,
 		})
 	}
 

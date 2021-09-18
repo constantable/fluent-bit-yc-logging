@@ -1,0 +1,6 @@
+.github
+.idea
+.gitignore
+LICENSE
+*.key
+values-prod-*

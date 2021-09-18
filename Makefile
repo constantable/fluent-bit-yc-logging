@@ -1,13 +1,11 @@
 build:
-	go build -buildmode=c-shared -o fluent-bit-yc-logging.so .
+	go build -buildmode=c-shared -o fluent-bit-yc-logging.so -v .
 
 clean:
 	rm -rf *.so *.h *~
 
-proto:
-	protoc  -Icloudapi -Icloudapi/third_party/googleapis --go_out=. --go_opt=paths=source_relative \
-    --go-grpc_out=. --go-grpc_opt=paths=source_relative \
-    yandex/cloud/logging/v1/log_ingestion_service.proto
+docker-build:
+	docker build -f Dockerfile -t fbyl .
 
-clone-api-proto:
-	git clone https://github.com/yandex-cloud/cloudapi.git 
+docker-run:
+	docker run -p 2020:2020 fbyl
