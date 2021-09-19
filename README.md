@@ -1,3 +1,6 @@
+![docker-publish](https://github.com/constantable/fluent-bit-yc-logging/actions/workflows/docker-publish.yml/badge.svg)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/constantable/fluent-bit-yc-logging?style=flat)
+
 # Yandex Cloud Logging Fluent Bit output plugin
 
 [Fluent Bit](https://fluentbit.io) is a fast and lightweight log processor and forwarder or Linux, OSX and BSD family operating systems.
@@ -28,7 +31,7 @@ helm install fluent-bit fluent/fluent-bit --values example-values.yaml
 ```yml
 image:
   repository: ghcr.io/constantable/fluent-bit-yc-logging
-  tag: "main"
+  tag: "latest"
   pullPolicy: Always
 
 config:
