@@ -8,4 +8,4 @@ docker-build:
 	docker build -f Dockerfile -t fbyl .
 
 docker-run:
-	docker run -p 2020:2020 fbyl
+	docker run -p 2020:2020 -v test:/test fbyl

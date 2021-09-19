@@ -2,12 +2,9 @@ package main
 
 import (
 	"C"
-	"time"
-
+	log_entry "fluent-bit-yc-logging/log-entry"
 	"log"
 	"unsafe"
-
-	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/fluent/fluent-bit-go/output"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/logging/v1"
@@ -15,9 +12,7 @@ import (
 
 	"fluent-bit-yc-logging/config"
 	"fluent-bit-yc-logging/connection"
-	"fmt"
 )
-import "google.golang.org/protobuf/types/known/structpb"
 
 //export FLBPluginRegister
 func FLBPluginRegister(def unsafe.Pointer) int {
@@ -52,33 +47,8 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 			break
 		}
 
-		var timestampTime time.Time
-		switch tts := ts.(type) {
-		case output.FLBTime:
-			timestampTime = tts.Time
-		case uint64:
-			timestampTime = time.Unix(int64(tts), 0)
-		default:
-			timestampTime = time.Now()
-		}
-		msg := make(map[string]string)
-		json := make(map[string]interface{})
-		for key, value := range record {
-			strKey := fmt.Sprintf("%v", key)
-			strValue := fmt.Sprintf("%v", value)
-
-			msg[strKey] = strValue
-			json[strKey] = value
-		}
-		payload, err := structpb.NewStruct(json)
-		if err != nil {
-			log.Fatal(err)
-		}
-		entries = append(entries, &logging.IncomingLogEntry{
-			Timestamp:   timestamppb.New(timestampTime),
-			Message:     fmt.Sprintf("%v", msg),
-			JsonPayload: payload,
-		})
+		entry := log_entry.NewLogEntry(ts, record)
+		entries = append(entries, entry)
 	}
 
 	client := output.FLBPluginGetContext(ctx).(connection.Client)
