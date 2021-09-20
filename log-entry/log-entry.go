@@ -2,12 +2,13 @@ package log_entry
 
 import (
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/fluent/fluent-bit-go/output"
 	"github.com/yandex-cloud/go-genproto/yandex/cloud/logging/v1"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
-	"time"
 )
 
 func NewLogEntry(ts interface{}, record map[interface{}]interface{}) (entry *logging.IncomingLogEntry) {
@@ -20,8 +21,8 @@ func NewLogEntry(ts interface{}, record map[interface{}]interface{}) (entry *log
 	default:
 		timestampTime = time.Now()
 	}
-	msg := make(map[string]interface{})
-	msg = parseRecord(record)
+
+	msg := parseRecord(record)
 
 	payload, err := structpb.NewStruct(msg)
 	if err != nil {

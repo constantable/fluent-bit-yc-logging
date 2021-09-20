@@ -49,15 +49,29 @@ func FLBPluginFlushCtx(ctx, data unsafe.Pointer, length C.int, tag *C.char) int 
 
 		entry := log_entry.NewLogEntry(ts, record)
 		entries = append(entries, entry)
+
+		if len(entries) == 100 {
+			err := flush(ctx, entries)
+			entries = nil
+			if err != nil {
+				log.Fatal(err)
+				return output.FLB_ERROR
+			}
+		}
 	}
 
-	client := output.FLBPluginGetContext(ctx).(connection.Client)
-	err := connection.WriteEntries(client, entries)
+	err := flush(ctx, entries)
 	if err != nil {
 		log.Fatal(err)
 		return output.FLB_ERROR
 	}
 	return output.FLB_OK
+}
+
+func flush(ctx unsafe.Pointer, entries []*logging.IncomingLogEntry) (err error) {
+	client := output.FLBPluginGetContext(ctx).(connection.Client)
+	err = connection.WriteEntries(client, entries)
+	return
 }
 
 //export FLBPluginExit
