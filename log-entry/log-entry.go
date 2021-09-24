@@ -28,11 +28,52 @@ func NewLogEntry(ts interface{}, record map[interface{}]interface{}) (entry *log
 	if err != nil {
 		log.Fatal(err)
 	}
+	var message interface{}
+	ok := false
+	if message, ok = msg["log"]; !ok {
+		if message, ok = msg["@message"]; !ok {
+			message = ""
+		}
+	}
+
 	return &logging.IncomingLogEntry{
 		Timestamp:   timestamppb.New(timestampTime),
-		Message:     fmt.Sprintf("%v", msg["log"]),
+		Message:     fmt.Sprintf("%v", message),
+		Level:       getLevel(msg),
 		JsonPayload: payload,
 	}
+}
+
+func getLevel(msg map[string]interface{}) logging.LogLevel_Level {
+	level := logging.LogLevel_LEVEL_UNSPECIFIED
+
+	// if logstash formatted
+	if fields, ok := msg["@fields"]; ok {
+		if lvl, ok2 := fields.(map[string]interface{})["level"]; ok2 {
+			switch fmt.Sprintf("%v", lvl) {
+			case "100":
+				return logging.LogLevel_DEBUG
+			case "200":
+				return logging.LogLevel_INFO
+			case "250": // NOTICE generally
+				return logging.LogLevel_INFO
+			case "300":
+				return logging.LogLevel_WARN
+			case "400":
+				return logging.LogLevel_ERROR
+			case "500": // CRITICAL
+				return logging.LogLevel_FATAL
+			case "550": // ALERT
+				return logging.LogLevel_FATAL
+			case "600": // EMERGENCY
+				return logging.LogLevel_FATAL
+			default:
+				return logging.LogLevel_LEVEL_UNSPECIFIED
+			}
+		}
+	}
+
+	return level
 }
 
 func parseRecord(inputRecord map[interface{}]interface{}) map[string]interface{} {
