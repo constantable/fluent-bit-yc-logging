@@ -1,4 +1,5 @@
 ![docker-publish](https://github.com/constantable/fluent-bit-yc-logging/actions/workflows/docker-publish.yml/badge.svg)
+![go](https://github.com/constantable/fluent-bit-yc-logging/actions/workflows/go.yml/badge.svg)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/constantable/fluent-bit-yc-logging?style=flat)
 
 # Yandex Cloud Logging Fluent Bit output plugin

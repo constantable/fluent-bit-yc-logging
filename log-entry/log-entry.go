@@ -3,6 +3,7 @@ package log_entry
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/fluent/fluent-bit-go/output"
@@ -70,6 +71,25 @@ func getLevel(msg map[string]interface{}) logging.LogLevel_Level {
 			default:
 				return logging.LogLevel_LEVEL_UNSPECIFIED
 			}
+		}
+	}
+
+	// if still no level try to detect level from message
+	var message interface{}
+	ok := false
+	if message, ok = msg["log"]; !ok {
+		if message, ok = msg["@message"]; !ok {
+			return level
+		}
+	}
+	str := fmt.Sprintf("%v", message)
+	var levels = []string{"EMERGENCY", "ALERT", "CRIT", "FATAL", "ERROR", "WARN", "INFO", "NOTICE", "DEBUG"}
+	var levelsTransformed = []logging.LogLevel_Level{logging.LogLevel_FATAL, logging.LogLevel_FATAL, logging.LogLevel_FATAL, logging.LogLevel_FATAL, logging.LogLevel_ERROR,
+		logging.LogLevel_WARN, logging.LogLevel_INFO, logging.LogLevel_INFO, logging.LogLevel_DEBUG}
+
+	for i, v := range levels {
+		if strings.Contains(str, v) {
+			return levelsTransformed[i]
 		}
 	}
 

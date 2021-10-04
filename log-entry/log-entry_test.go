@@ -74,6 +74,12 @@ var GetLevelTestData = []struct {
 	{[]byte(`{"@fields": {"level": 0}}`), logging.LogLevel_LEVEL_UNSPECIFIED},
 	{[]byte(`{"@fields": {"field": "200"}}`), logging.LogLevel_LEVEL_UNSPECIFIED},
 	{[]byte(`{"fields": {"level": "200"}}`), logging.LogLevel_LEVEL_UNSPECIFIED},
+	{[]byte(`{"log": {"level": "200"}}`), logging.LogLevel_LEVEL_UNSPECIFIED},
+	{[]byte(`{"log": "something"}`), logging.LogLevel_LEVEL_UNSPECIFIED},
+	{[]byte(`{"log": "APP.CRIT Message"}`), logging.LogLevel_FATAL},
+	{[]byte(`{"log": {"level": "APP.CRIT Message"}}`), logging.LogLevel_FATAL},
+	{[]byte(`{"log": "crit info"}`), logging.LogLevel_LEVEL_UNSPECIFIED},
+	{[]byte(`{"log": "crit INFO"}`), logging.LogLevel_INFO},
 }
 
 func TestGetLevel(t *testing.T) {
