@@ -53,27 +53,12 @@ func getLevel(msg map[string]interface{}) logging.LogLevel_Level {
 	// if logstash formatted
 	if fields, ok := msg["@fields"]; ok {
 		if lvl, ok2 := fields.(map[string]interface{})["level"]; ok2 {
-			switch fmt.Sprintf("%v", lvl) {
-			case "100":
-				return logging.LogLevel_DEBUG
-			case "200":
-				return logging.LogLevel_INFO
-			case "250": // NOTICE generally
-				return logging.LogLevel_INFO
-			case "300":
-				return logging.LogLevel_WARN
-			case "400":
-				return logging.LogLevel_ERROR
-			case "500": // CRITICAL
-				return logging.LogLevel_FATAL
-			case "550": // ALERT
-				return logging.LogLevel_FATAL
-			case "600": // EMERGENCY
-				return logging.LogLevel_FATAL
-			default:
-				return logging.LogLevel_LEVEL_UNSPECIFIED
-			}
+			return getMonologLevel(lvl)
 		}
+	}
+
+	if monologLevel, ok := msg["monolog_level"]; ok {
+		return getMonologLevel(monologLevel)
 	}
 
 	// if still no level try to detect level from message
@@ -98,6 +83,29 @@ func getLevel(msg map[string]interface{}) logging.LogLevel_Level {
 	}
 
 	return level
+}
+
+func getMonologLevel(monologLevel interface{}) logging.LogLevel_Level {
+	switch fmt.Sprintf("%v", monologLevel) {
+	case "100":
+		return logging.LogLevel_DEBUG
+	case "200":
+		return logging.LogLevel_INFO
+	case "250": // NOTICE generally
+		return logging.LogLevel_INFO
+	case "300":
+		return logging.LogLevel_WARN
+	case "400":
+		return logging.LogLevel_ERROR
+	case "500": // CRITICAL
+		return logging.LogLevel_FATAL
+	case "550": // ALERT
+		return logging.LogLevel_FATAL
+	case "600": // EMERGENCY
+		return logging.LogLevel_FATAL
+	default:
+		return logging.LogLevel_LEVEL_UNSPECIFIED
+	}
 }
 
 func parseRecord(inputRecord map[interface{}]interface{}) map[string]interface{} {
