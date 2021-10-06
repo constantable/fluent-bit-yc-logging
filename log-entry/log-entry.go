@@ -33,7 +33,9 @@ func NewLogEntry(ts interface{}, record map[interface{}]interface{}) (entry *log
 	ok := false
 	if message, ok = msg["log"]; !ok {
 		if message, ok = msg["@message"]; !ok {
-			message = ""
+			if message, ok = msg["message"]; !ok {
+				message = ""
+			}
 		}
 	}
 
@@ -79,7 +81,9 @@ func getLevel(msg map[string]interface{}) logging.LogLevel_Level {
 	ok := false
 	if message, ok = msg["log"]; !ok {
 		if message, ok = msg["@message"]; !ok {
-			return level
+			if message, ok = msg["message"]; !ok {
+				return level
+			}
 		}
 	}
 	str := fmt.Sprintf("%v", message)
